@@ -1,6 +1,8 @@
+import { defineContentScript } from '#imports'
+
 export default defineContentScript({
-  matches: ['*://*.google.com/*'],
+  matches: ['https://open.spotify.com/*'],
   main() {
-    console.log('Hello content.');
+    console.log('Hello Spotify.');
   },
 });
