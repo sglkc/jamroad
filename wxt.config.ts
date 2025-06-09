@@ -4,8 +4,12 @@ import { defineConfig } from 'wxt'
 // See https://wxt.dev/api/config.html
 export default defineConfig({
   manifest: {
-    permissions: ['activeTab', 'declarativeContent', 'storage'],
-    host_permissions: ['https://translate.google.com/*'],
+    permissions: ['activeTab', 'declarativeContent', 'storage', 'webRequest'],
+    host_permissions: [
+      'https://open.spotify.com/*',
+      'https://*.spotify.com/track-playback/v1/*',
+      'https://translate.google.com/*',
+    ],
     externally_connectable: {
       ids: ['*'],
       matches: ['https://open.spotify.com/*'],
