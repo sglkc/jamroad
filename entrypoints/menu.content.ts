@@ -36,8 +36,9 @@ export default defineContentScript({
       menu.insertAdjacentElement('afterbegin', item as HTMLElement)
     }
 
+    // TODO: handle first song on search with big ahh element
     function addToPlaylist(song: HTMLElement): void {
-      const titleElement = song.querySelector<HTMLAnchorElement>('[data-testid="internal-track-link"]')!
+      const titleElement = song.querySelector<HTMLAnchorElement>('[href^="/track"]')!
       const title = titleElement.textContent!
       const link = titleElement.href!
 
@@ -46,15 +47,20 @@ export default defineContentScript({
       // In artist page, the song artist doesnt show
       if (!artist) {
         // document.querySelector('[data-testid="artist-page"]')
-        artist = document.querySelector('[data-testid="adaptiveEntityTitle"]')!.textContent!
+        artist = document.querySelector('[data-testid="adaptiveEntityTitle"]')?.textContent!
       }
 
       Content.sendMessage('add', { title, artist, link })
       console.log(`Added song "${title}" by ${artist} (${link})`)
 
-      // Destroy context menu after that (must be manually triggered)
-      // @ts-expect-error internal attribute
-      document.querySelector('body > [data-tippy-root]:has(#context-menu)')?._tippy?.destroy?.()
+      // Destroy context menu, details in the script
+      // injectScript('/destroy-tippy.js')
+      // Nah this function errors because it uses browser instead of chrome
+      // Gotta do the longest way
+      const script = document.createElement('script')
+      script.src = chrome.runtime.getURL('/destroy-tippy.js')
+      script.onload = () => script.remove()
+      document.head.append(script)
     }
   },
 })

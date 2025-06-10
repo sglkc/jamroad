@@ -12,8 +12,8 @@ export default defineContentScript({
 
     // Testing add song
     Content.onMessage('add', ({ data }) => {
-      console.log('playing song', data, 'in 3 seconds')
-      setTimeout(() => playSong(data.link), 3000)
+      console.log('playing song', data, 'in 5 seconds')
+      setTimeout(() => playSong(data.link), 5000)
     })
 
     let loadingSong = false
@@ -35,16 +35,18 @@ export default defineContentScript({
       // Play the song! (if the button is found)
       let tries = 0
 
-      // Lets try in 5 secs
+      // Lets try in 10 secs
       const timeoutId = setTimeout(() => {
-        if (++tries > 10) clearTimeout(timeoutId)
+        if (++tries > 20) clearTimeout(timeoutId)
 
-        document
-          .querySelector<HTMLButtonElement>(
-            '[data-testid="track-page"] [data-testid="action-bar-row"] [data-testid="play-button"]'
-          )
-          ?.click()
-          && clearTimeout(timeoutId)
+        const button = document.querySelector<HTMLButtonElement>(
+          '[data-testid="track-page"] [data-testid="action-bar-row"] [data-testid="play-button"]'
+        )
+
+        if (!button) return console.log('button not fund')
+
+        button.click()
+        clearTimeout(timeoutId)
       }, 500)
 
       // Restore user lyrics page

@@ -15,6 +15,12 @@ export default defineConfig({
       matches: ['https://open.spotify.com/*'],
       accepts_tls_channel_id: false,
     },
+    web_accessible_resources: [
+      {
+        resources: ["destroy-tippy.js"],
+        matches: ['https://open.spotify.com/*']
+      }
+    ]
   },
   modules: ['@wxt-dev/unocss'],
   imports: false,
