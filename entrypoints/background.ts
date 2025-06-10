@@ -7,7 +7,6 @@ export default defineBackground(() => {
   function getDeviceId(
     event: chrome.webRequest.WebRequestBodyDetails
   ): void | chrome.webRequest.BlockingResponse {
-    console.log(event.url)
     /**
      * https://gew4-spclient.spotify.com/track-playback/v1/devices/(device_id)/volume
      * https://gew4-spclient.spotify.com/track-playback/v1/devices/(device_id)/state
