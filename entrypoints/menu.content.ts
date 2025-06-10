@@ -1,4 +1,5 @@
 import { defineContentScript } from '#imports'
+import { Content } from '@/utils/messaging'
 
 export default defineContentScript({
   matches: ['https://open.spotify.com/*'],
@@ -36,7 +37,24 @@ export default defineContentScript({
     }
 
     function addToPlaylist(song: HTMLElement): void {
-      console.log(song)
+      const titleElement = song.querySelector<HTMLAnchorElement>('[data-testid="internal-track-link"]')!
+      const title = titleElement.textContent!
+      const link = titleElement.href!
+
+      let artist = titleElement.nextElementSibling?.textContent
+
+      // In artist page, the song artist doesnt show
+      if (!artist) {
+        // document.querySelector('[data-testid="artist-page"]')
+        artist = document.querySelector('[data-testid="adaptiveEntityTitle"]')!.textContent!
+      }
+
+      Content.sendMessage('add', { title, artist, link })
+      console.log(`Added song "${title}" by ${artist} (${link})`)
+
+      // Destroy context menu after that (must be manually triggered)
+      // @ts-expect-error internal attribute
+      document.querySelector('body > [data-tippy-root]:has(#context-menu)')?._tippy?.destroy?.()
     }
   },
 })
