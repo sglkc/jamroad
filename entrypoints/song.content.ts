@@ -12,7 +12,7 @@ export default defineContentScript({
 
     // Testing add song
     Content.onMessage('add', ({ data }) => {
-      console.log('playing song', data, 'in 3 sexx')
+      console.log('playing song', data, 'in 3 seconds')
       setTimeout(() => playSong(data.link), 3000)
     })
 
@@ -30,16 +30,19 @@ export default defineContentScript({
       // Change tab url without refreshing
       history.pushState(null, '', link)
       // Trigger react app refresh
-      location.hash += '#'
+      location.hash = 'refresh'
 
       // Play the song! (if the button is found)
       let tries = 0
 
+      // Lets try in 5 secs
       const timeoutId = setTimeout(() => {
         if (++tries > 10) clearTimeout(timeoutId)
 
         document
-          .querySelector<HTMLButtonElement>('[data-testid="action-bar-row"] [data-testid="play-button"]')
+          .querySelector<HTMLButtonElement>(
+            '[data-testid="track-page"] [data-testid="action-bar-row"] [data-testid="play-button"]'
+          )
           ?.click()
           && clearTimeout(timeoutId)
       }, 500)
@@ -47,7 +50,7 @@ export default defineContentScript({
       // Restore user lyrics page
       if (isLyrics) {
         history.pushState(null, '', '/lyrics')
-        location.hash += 'refresh'
+        location.hash = 'refresh'
       }
 
       loadingSong = false
