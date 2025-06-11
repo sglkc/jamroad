@@ -4,7 +4,7 @@ import { Content } from '@/utils/messaging'
 export default defineContentScript({
   matches: ['https://open.spotify.com/*'],
   main() {
-    console.log('Registered context menu script.')
+    console.debug('Registered context menu script.')
 
     const observer = new MutationObserver(bodyObserver)
     observer.observe(document.body, { childList: true })
@@ -51,7 +51,9 @@ export default defineContentScript({
       }
 
       Content.sendMessage('add', { title, artist, link })
-      console.log(`Added song "${title}" by ${artist} (${link})`)
+      Content.sendMessage('toast', {
+        text: `Added "${title}" by ${artist}`
+      })
 
       // Destroy context menu, details in the script
       // injectScript('/destroy-tippy.js')

@@ -1,10 +1,10 @@
 import { defineContentScript } from '#imports'
-import { Content } from '@/utils/messaging'
+import { Content, SongMessage } from '@/utils/messaging'
 
 export default defineContentScript({
   matches: ['https://open.spotify.com/*'],
   main() {
-    console.log('registered song content script')
+    console.debug('Registered song content script')
 
     // Peak url hijacking to force user play song
     // Its possible to use the official api but its risky
@@ -12,20 +12,24 @@ export default defineContentScript({
 
     // Testing add song
     Content.onMessage('add', ({ data }) => {
-      console.log('playing song', data, 'in 5 seconds')
-      setTimeout(() => playSong(data.link), 5000)
+      console.debug('playing song', data, 'in 5 seconds')
+      setTimeout(() => playSong(data), 5000)
     })
 
     let loadingSong = false
 
-    function playSong(link: string): boolean {
-      console.log('trying to play song', link, loadingSong)
+    async function playSong({ artist, link, title }: SongMessage): Promise<boolean> {
       if (loadingSong) return false
+
+      const toastId = await Content.sendMessage('toast', {
+        text: `Playing "${title}" by ${artist}`,
+        duration: -1,
+      })
 
       loadingSong = true
 
-      // Save current user state in case they're in lyrics page
-      const isLyrics = location.pathname.startsWith('/lyrics')
+      // Save current user url to restore state
+      const pathname = location.pathname
 
       // Change tab url without refreshing
       history.pushState(null, '', link)
@@ -43,19 +47,21 @@ export default defineContentScript({
           '[data-testid="track-page"] [data-testid="action-bar-row"] [data-testid="play-button"]'
         )
 
-        if (!button) return console.log('button not fund')
+        if (!button) return console.debug('Song play button not found')
 
         button.click()
         clearTimeout(timeoutId)
       }, 500)
 
-      // Restore user lyrics page
-      if (isLyrics) {
-        history.pushState(null, '', '/lyrics')
+      // Restore user url
+      if (pathname) {
+        history.pushState(null, '', pathname)
         location.hash = 'refresh'
       }
 
+      Content.sendMessage('destroyToast', toastId)
       loadingSong = false
+
       return true
     }
   }
