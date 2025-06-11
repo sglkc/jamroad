@@ -1,9 +1,6 @@
-import { defineBackground } from '#imports'
 import { deviceIdStorage } from '@/utils/storage'
 
-export default defineBackground(() => {
-  console.log('Hello background!', { id: chrome.runtime.id })
-
+export default function initDeviceIdBackground() {
   function getDeviceId(
     event: chrome.webRequest.WebRequestBodyDetails
   ): void | chrome.webRequest.BlockingResponse {
@@ -46,7 +43,7 @@ export default defineBackground(() => {
       } catch (error) {
         console.error('Error parsing request body:', error)
       }
-    }
+      }
   }
 
   // Get device ID from API requests
@@ -59,4 +56,4 @@ export default defineBackground(() => {
   deviceIdStorage.watch((deviceId) => {
     console.log('Got device id:', deviceId)
   })
-})
+}

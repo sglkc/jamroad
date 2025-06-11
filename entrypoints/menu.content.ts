@@ -1,5 +1,5 @@
 import { defineContentScript } from '#imports'
-import { Content, noop } from '@/utils/messaging'
+import { Content } from '@/utils/messaging'
 
 export default defineContentScript({
   matches: ['https://open.spotify.com/*'],
@@ -51,10 +51,10 @@ export default defineContentScript({
       }
 
       // Ignore errors because cant receive any response here
-      Content.sendMessage('add', { title, artist, link }).catch(noop)
+      Content.sendMessage('add', { title, artist, link })
       Content.sendMessage('toast', {
         text: `Added "${title}" by ${artist}`
-      }).catch(noop)
+      })
 
       // Destroy context menu, details in the script
       // injectScript('/destroy-tippy.js')

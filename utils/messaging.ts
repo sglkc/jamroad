@@ -1,4 +1,4 @@
-import { defineCustomEventMessaging } from '@webext-core/messaging/page'
+import { defineExtensionMessaging } from '@webext-core/messaging'
 
 export interface ToastMessage {
   text: string
@@ -18,12 +18,10 @@ export interface ContentProtocolMap {
   destroyToast(id: number): boolean
 }
 
-export const noop = () => undefined
-
 export async function createToast(data: ToastMessage | string): Promise<number> {
   let message = data
   if (typeof message === 'string') message = { text: message }
   return await Content.sendMessage('toast', message)
 }
 
-export const Content = defineCustomEventMessaging<ContentProtocolMap>({ namespace: 'song' })
+export const Content = defineExtensionMessaging<ContentProtocolMap>()

@@ -19,6 +19,10 @@ export default defineContentScript({
         gravity: 'bottom',
         position: 'center',
         stopOnFocus: false,
+        offset: {
+          x: 0,
+          y: '5rem'
+        },
         style: {
           background: '#e6efcd',
           color: '#1d230b'
