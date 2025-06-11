@@ -1,6 +1,7 @@
 import { defineContentScript } from '#imports'
 import { Content, ContentProtocolMap, createToast } from '@/utils/messaging'
 import { createPeer } from '@/utils/p2p'
+import { connectionStorage, usernameStorage } from '@/utils/storage'
 
 interface PeerData<T extends keyof ContentProtocolMap = keyof ContentProtocolMap> {
   type: T
@@ -12,36 +13,62 @@ export default defineContentScript({
   async main() {
     console.debug('Registered peer content script')
 
-    // TODO: input peer id
-    const peer = await createPeer(chrome.runtime.id)
+    usernameStorage.watch(async (username) => {
+      if (!username) return
 
-    peer
-      .on('open', (id) => {
-        createToast(`Connected`)
-        console.debug('Connected as', id)
-      })
-      .on('connection', (connection) => {
-        const id = connection.peer.replace('jamroad-', '')
-        createToast(`${id} joined`)
+      const peer = await createPeer(username)
 
-        connection.on('data', (unk) => {
-          if (!unk || typeof unk !== 'object' || !('type' in unk) || !('data' in unk)) return
-
-          const { type, data } = unk as PeerData
-          createToast(`Received message ${type} from ${id}`)
-          Content.sendMessage(type, data)
+      peer
+        .on('open', (id) => {
+          createToast(`Connected`)
+          console.debug('Connected as', id)
+          connectionStorage.setValue('on')
         })
+        .on('connection', (connection) => {
+          const id = connection.peer.replace('jamroad-', '')
+          createToast(`${id} joined`)
 
-        connection.on('close', () => {
-          createToast(`${id} left`)
+          connection.on('data', (unk) => {
+            if (!unk || typeof unk !== 'object' || !('type' in unk) || !('data' in unk)) return
+
+            const { type, data } = unk as PeerData
+            createToast(`Received message ${type} from ${id}`)
+            Content.sendMessage(type, data)
+          })
+
+          connection.on('error', (err) => console.error(`connection ${id} error`, err))
+
+          connection.on('close', () => {
+            createToast(`${id} left`)
+          })
         })
-      })
-      .on('disconnected', () => {
-        createToast('Disconnected')
-      })
-      .on('error', (err) => {
-        createToast(`Error: ${err}`)
-        console.error(err)
-      })
+        .on('disconnected', () => {
+          createToast('Disconnected, reconnecting...')
+          peer.reconnect()
+        })
+        .on('error', (err) => {
+          createToast(`Error: ${err}`)
+          console.error('Peer connection error', err)
+          connectionStorage.setValue('off')
+        })
+    })
+
+    // // Get Spotify username from page (UNUSED (YET))
+    // let username: string = ''
+    //
+    // await new Promise<void>((resolve) => {
+    //   const observer = new MutationObserver(() => {
+    //     const profile = document.querySelector<HTMLDivElement>('[data-testid="user-widget-avatar"]')
+    //     if (!profile) return
+    //
+    //     username = profile.title
+    //     // userImage = profile.querySelector('img')?.src
+    //
+    //     observer.disconnect()
+    //     resolve()
+    //   })
+    //
+    //   observer.observe(document.querySelector('#main') ?? document.body, { childList: true })
+    // })
   }
 })
