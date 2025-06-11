@@ -9,6 +9,7 @@ export default defineConfig({
       'https://open.spotify.com/*',
       'https://*.spotify.com/track-playback/v1/*',
       'https://translate.google.com/*',
+      'https://speed.cloudflare.com/*'
     ],
     externally_connectable: {
       ids: ['*'],

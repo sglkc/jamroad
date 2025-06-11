@@ -1,8 +1,8 @@
 {
-  "name": "spotjam",
-  "description": "Share Spotify web listening experience without premium!",
+  "name": "Jamroad",
+  "description": "Share Spotify web listening experience in real-time without premium",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "wxt",
@@ -19,6 +19,7 @@
     "@unocss/reset": "^0.54.3",
     "@webext-core/messaging": "^2.2.0",
     "deepsignal": "^1.6.0",
+    "peerjs": "^1.5.5",
     "preact": "^10.26.6",
     "toastify-js": "^1.12.0"
   },
