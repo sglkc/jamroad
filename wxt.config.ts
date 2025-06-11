@@ -1,9 +1,11 @@
 import { preact } from '@preact/preset-vite'
 import { defineConfig } from 'wxt'
+import { name } from './package.json'
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
-  manifest: {
+  manifest: ({ mode }) => ({
+    name: name + (mode === 'development' ? ' [DEV]' : ''),
     permissions: ['activeTab', 'declarativeContent', 'storage', 'webRequest'],
     host_permissions: [
       'https://open.spotify.com/*',
@@ -22,7 +24,7 @@ export default defineConfig({
         matches: ['https://open.spotify.com/*']
       }
     ]
-  },
+  }),
   modules: ['@wxt-dev/unocss'],
   imports: false,
   webExt: {

@@ -2,8 +2,13 @@ import { useEffect, useRef, useState } from 'preact/hooks'
 import { JSX } from 'preact/jsx-runtime'
 import { ConnectionEnum, connectionStorage, usernameStorage } from '@/utils/storage'
 
-export default function App() {
-  const [status, setStatus] = useState<ConnectionEnum>('off')
+export interface AppProps {
+  connection: ConnectionEnum
+  username?: string
+}
+
+export default function App({ connection, username }: AppProps) {
+  const [status, setStatus] = useState<ConnectionEnum>(connection)
   const [message, setMessage] = useState<string>()
   const input = useRef<HTMLInputElement>(null)
 
@@ -38,8 +43,8 @@ export default function App() {
   }, [])
 
   return (
-    <main class="p-8 bg-blue-200 w-72 grid gap-4">
-      <h1 class="text-lg font-bold">Connect to the internet</h1>
+    <main class="grid gap-4">
+      <h2 class="text-lg font-bold">Connect to the internet</h2>
       <form class="grid gap-2" onSubmit={onSubmit}>
         <div class="flex gap-2">
           <input
@@ -49,6 +54,7 @@ export default function App() {
             pattern="[A-Za-z0-9\-_]+"
             placeholder="Enter username (anything)"
             disabled={status !== 'off'}
+            defaultValue={username}
             required
           />
           <button
@@ -61,6 +67,12 @@ export default function App() {
         </div>
         <p>{ message ?? 'alphanumeric, max. length 16 chars' }</p>
       </form>
+      <div>
+        <h2 class="text-lg font-bold">Playlist</h2>
+        <ul>
+          <li></li>
+        </ul>
+      </div>
     </main>
   )
 }
