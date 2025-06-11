@@ -8,12 +8,16 @@ export default defineContentScript({
 
     // Peak url hijacking to force user play song
     // Its possible to use the official api but its risky
-    Content.onMessage('play', ({ data }) => playSong(data))
+    Content.onMessage('play', ({ data }) => {
+      playSong(data)
+      return true
+    })
 
     // Testing add song
     Content.onMessage('add', ({ data }) => {
       console.debug('playing song', data, 'in 5 seconds')
       setTimeout(() => playSong(data), 5000)
+      return true
     })
 
     let loadingSong = false
@@ -37,21 +41,33 @@ export default defineContentScript({
       location.hash = 'refresh'
 
       // Play the song! (if the button is found)
-      let tries = 0
+      let intervalId: NodeJS.Timeout | undefined
 
-      // Lets try in 10 secs
-      const timeoutId = setTimeout(() => {
-        if (++tries > 20) clearTimeout(timeoutId)
+      await new Promise<void>((resolve) => {
+        let tries = 0
 
-        const button = document.querySelector<HTMLButtonElement>(
-          '[data-testid="track-page"] [data-testid="action-bar-row"] [data-testid="play-button"]'
-        )
+        // Lets try in 10 secs
+        intervalId = setInterval(() => {
+          if (tries > 10) resolve()
 
-        if (!button) return console.debug('Song play button not found')
+          const button = document.querySelector<HTMLButtonElement>(
+            '[data-testid="track-page"] [data-testid="action-bar-row"] [data-testid="play-button"]'
+          )
 
-        button.click()
-        clearTimeout(timeoutId)
-      }, 500)
+          console.debug(tries, button)
+
+          if (button) {
+            button.click()
+            resolve()
+          } else {
+            console.debug('Song play button not found')
+          }
+
+          tries++
+        }, 500)
+      })
+
+      clearInterval(intervalId)
 
       // Restore user url
       if (pathname) {

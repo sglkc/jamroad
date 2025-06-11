@@ -1,5 +1,5 @@
 import { defineContentScript } from '#imports'
-import { Content } from '@/utils/messaging'
+import { Content, noop } from '@/utils/messaging'
 
 export default defineContentScript({
   matches: ['https://open.spotify.com/*'],
@@ -37,7 +37,7 @@ export default defineContentScript({
     }
 
     // TODO: handle first song on search with big ahh element
-    function addToPlaylist(song: HTMLElement): void {
+    function addToPlaylist(song: HTMLElement) {
       const titleElement = song.querySelector<HTMLAnchorElement>('[href^="/track"]')!
       const title = titleElement.textContent!
       const link = titleElement.href!
@@ -50,10 +50,11 @@ export default defineContentScript({
         artist = document.querySelector('[data-testid="adaptiveEntityTitle"]')?.textContent!
       }
 
-      Content.sendMessage('add', { title, artist, link })
+      // Ignore errors because cant receive any response here
+      Content.sendMessage('add', { title, artist, link }).catch(noop)
       Content.sendMessage('toast', {
         text: `Added "${title}" by ${artist}`
-      })
+      }).catch(noop)
 
       // Destroy context menu, details in the script
       // injectScript('/destroy-tippy.js')

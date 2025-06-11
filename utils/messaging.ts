@@ -11,11 +11,19 @@ export interface SongMessage {
   link: string
 }
 
-interface ContentProtocolMap {
+export interface ContentProtocolMap {
   add(song: SongMessage): boolean
   play(song: SongMessage): boolean
   toast(data: ToastMessage): number
   destroyToast(id: number): boolean
+}
+
+export const noop = () => undefined
+
+export async function createToast(data: ToastMessage | string): Promise<number> {
+  let message = data
+  if (typeof message === 'string') message = { text: message }
+  return await Content.sendMessage('toast', message)
 }
 
 export const Content = defineCustomEventMessaging<ContentProtocolMap>({ namespace: 'song' })
