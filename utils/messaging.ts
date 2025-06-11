@@ -9,6 +9,7 @@ export interface SongMessage {
   title: string
   artist: string
   link: string
+  image: string
 }
 
 export interface ContentProtocolMap {

@@ -42,16 +42,23 @@ export default defineContentScript({
       const title = titleElement.textContent!
       const link = titleElement.href!
 
+      let image = song.querySelector<HTMLImageElement>('img')?.src
       let artist = titleElement.nextElementSibling?.textContent
 
-      // In artist page, the song artist doesnt show
+      // In artist page, the song artist doesnt show in the row
       if (!artist) {
-        // document.querySelector('[data-testid="artist-page"]')
+        // [data-testid="artist-page"]'
         artist = document.querySelector('[data-testid="adaptiveEntityTitle"]')?.textContent!
       }
 
+      // In album page, the song image doesnt show in the row
+      if (!image) {
+        // [data-testid="album-page"]
+        image = document.querySelector<HTMLImageElement>('[aria-label*="album"] img')?.src!
+      }
+
       // Ignore errors because cant receive any response here
-      Content.sendMessage('add', { title, artist, link })
+      Content.sendMessage('add', { title, artist, link, image })
       Content.sendMessage('toast', {
         text: `Added "${title}" by ${artist}`
       })

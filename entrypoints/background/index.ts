@@ -1,8 +1,9 @@
 import { defineBackground } from '#imports'
 import { Content, ContentProtocolMap } from '@/utils/messaging'
 import initDeviceIdBackground from './get-device-id'
+import { playlistStorage } from '@/utils/storage'
 
-export default defineBackground(() => {
+export default defineBackground(async () => {
   initDeviceIdBackground()
 
   // Allow accessing storage from content scripts
@@ -27,8 +28,19 @@ export default defineBackground(() => {
 
   // Peak duplicate lines solving
   const types: Array<keyof ContentProtocolMap> = [
-    'add', 'play', 'toast', 'destroyToast',
+    'play', 'toast', 'destroyToast',
   ]
 
   types.forEach(type => Content.onMessage(type, sendMessage(type)))
+
+  const playlist = await playlistStorage.getValue()
+
+  // Unique event
+  // TODO: modularize
+  Content.onMessage('add', ({ data }) => {
+    console.log(playlist, data)
+    playlist.push(data)
+    playlistStorage.setValue(playlist)
+    return Content.sendMessage('add', data)
+  })
 })

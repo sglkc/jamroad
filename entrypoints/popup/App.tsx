@@ -1,14 +1,17 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
 import { JSX } from 'preact/jsx-runtime'
-import { ConnectionEnum, connectionStorage, usernameStorage } from '@/utils/storage'
+import { ConnectionEnum, connectionStorage, playlistStorage, usernameStorage } from '@/utils/storage'
+import { Content, SongMessage } from '@/utils/messaging'
 
 export interface AppProps {
   connection: ConnectionEnum
   username?: string
+  playlist: SongMessage[]
 }
 
-export default function App({ connection, username }: AppProps) {
-  const [status, setStatus] = useState<ConnectionEnum>(connection)
+export default function App(props: AppProps) {
+  const [status, setStatus] = useState<ConnectionEnum>(props.connection)
+  const [playlist, setPlaylist] = useState<SongMessage[]>(props.playlist)
   const [message, setMessage] = useState<string>()
   const input = useRef<HTMLInputElement>(null)
 
@@ -23,23 +26,29 @@ export default function App({ connection, username }: AppProps) {
   }
 
   useEffect(() => {
-    // TODO: idk if this is the best way to handle this since the cleanup wont
-    // be called when the popup is closed, but it works for now
-    return connectionStorage.watch(async (connection) => {
+    const unwatchConnection = connectionStorage.watch(async (connection) => {
       setStatus(connection)
 
       if (connection === 'loading') {
         setMessage('Connecting...')
       }
-
       if (connection === 'on') {
         setMessage('Connected as ' + await usernameStorage.getValue())
       }
-
       if (connection === 'off') {
         setMessage('Disconnected')
       }
     })
+
+    const unwatchPlaylist = playlistStorage.watch(setPlaylist)
+
+    // TODO: idk if this is the best way to handle this since the cleanup wont
+    // be called when the popup is closed, but it works for now
+    return () => {
+      unwatchConnection()
+      unwatchPlaylist()
+      unwatchMessage()
+    }
   }, [])
 
   return (
@@ -54,7 +63,7 @@ export default function App({ connection, username }: AppProps) {
             pattern="[A-Za-z0-9\-_]+"
             placeholder="Enter username (anything)"
             disabled={status !== 'off'}
-            defaultValue={username}
+            defaultValue={props.username}
             required
           />
           <button
@@ -65,13 +74,32 @@ export default function App({ connection, username }: AppProps) {
             Set!
           </button>
         </div>
-        <p>{ message ?? 'alphanumeric, max. length 16 chars' }</p>
+        <p>{message ?? 'alphanumeric, max. length 16 chars'}</p>
       </form>
       <div>
         <h2 class="text-lg font-bold">Playlist</h2>
-        <ul>
-          <li></li>
-        </ul>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th colspan={2}>Title</th>
+              <th>Artist</th>
+            </tr>
+          </thead>
+          <tbody>
+            { playlist && playlist.map((song, i) => (
+              <tr key={song.link}>
+                <td>{i+1}</td>
+                <td>
+                  <img src={song.image} />
+                </td>
+                <td>{song.title}</td>
+                <td>{song.artist}</td>
+              </tr>
+            ))
+            }
+          </tbody>
+        </table>
       </div>
     </main>
   )
