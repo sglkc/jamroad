@@ -1,20 +1,14 @@
 import { defineExtensionMessaging } from '@webext-core/messaging'
+import { SongMetadata } from './types'
 
 export interface ToastMessage {
   text: string
   duration?: number
 }
 
-export interface SongMessage {
-  title: string
-  artist: string
-  link: string
-  image: string
-}
-
 export interface ContentProtocolMap {
-  add(song: SongMessage): boolean
-  play(song: SongMessage): boolean
+  add(song: SongMetadata): boolean
+  play(song: SongMetadata): boolean
   toast(data: ToastMessage): number
   destroyToast(id: number): boolean
 }

@@ -2,11 +2,11 @@ import { render } from 'preact'
 import App, { AppProps } from './App.tsx'
 import '@unocss/reset/tailwind-compat.css'
 import 'virtual:uno.css'
-import { connectionStorage, playlistStorage, usernameStorage } from '@/utils/storage.ts'
+import { statusStorage, playlistStorage, usernameStorage } from '@/utils/storage.ts'
 
 async function init() {
   const props: AppProps = {
-    connection: await connectionStorage.getValue(),
+    status: await statusStorage.getValue(),
     username: await usernameStorage.getValue(),
     playlist: await playlistStorage.getValue(),
   }

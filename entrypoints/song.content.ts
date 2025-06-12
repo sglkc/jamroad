@@ -1,5 +1,6 @@
 import { defineContentScript } from '#imports'
-import { Content, SongMessage } from '@/utils/messaging'
+import { Content } from '@/utils/messaging'
+import { SongMetadata } from '@/utils/types'
 
 export default defineContentScript({
   matches: ['https://open.spotify.com/*'],
@@ -22,7 +23,7 @@ export default defineContentScript({
 
     let loadingSong = false
 
-    async function playSong({ artist, link, title }: SongMessage): Promise<boolean> {
+    async function playSong({ artist, link, title }: SongMetadata): Promise<boolean> {
       if (loadingSong) return false
 
       const toastId = await Content.sendMessage('toast', {

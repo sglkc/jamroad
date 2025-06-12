@@ -1,7 +1,7 @@
 import { defineContentScript } from '#imports'
 import { Content, ContentProtocolMap, createToast } from '@/utils/messaging'
 import { createPeer } from '@/utils/p2p'
-import { connectionStorage, usernameStorage } from '@/utils/storage'
+import { statusStorage, usernameStorage } from '@/utils/storage'
 
 interface PeerData<T extends keyof ContentProtocolMap = keyof ContentProtocolMap> {
   type: T
@@ -22,7 +22,7 @@ export default defineContentScript({
         .on('open', (id) => {
           createToast(`Connected`)
           console.debug('Connected as', id)
-          connectionStorage.setValue('on')
+          statusStorage.setValue('on')
         })
         .on('connection', (connection) => {
           const id = connection.peer.replace('jamroad-', '')
@@ -49,7 +49,7 @@ export default defineContentScript({
         .on('error', (err) => {
           createToast(`Error: ${err}`)
           console.error('Peer connection error', err)
-          connectionStorage.setValue('off')
+          statusStorage.setValue('off')
         })
     })
 

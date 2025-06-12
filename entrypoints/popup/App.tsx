@@ -1,17 +1,17 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
 import { JSX } from 'preact/jsx-runtime'
-import { ConnectionEnum, connectionStorage, playlistStorage, usernameStorage } from '@/utils/storage'
-import { Content, SongMessage } from '@/utils/messaging'
+import { statusStorage, playlistStorage, usernameStorage } from '@/utils/storage'
+import { ConnectionStatus, SongMetadata } from '@/utils/types'
 
 export interface AppProps {
-  connection: ConnectionEnum
+  status: ConnectionStatus
   username?: string
-  playlist: SongMessage[]
+  playlist: SongMetadata[]
 }
 
 export default function App(props: AppProps) {
-  const [status, setStatus] = useState<ConnectionEnum>(props.connection)
-  const [playlist, setPlaylist] = useState<SongMessage[]>(props.playlist)
+  const [status, setStatus] = useState<ConnectionStatus>(props.status)
+  const [playlist, setPlaylist] = useState<SongMetadata[]>(props.playlist)
   const [message, setMessage] = useState<string>()
   const input = useRef<HTMLInputElement>(null)
 
@@ -21,12 +21,12 @@ export default function App(props: AppProps) {
     // TODO: alert!
     if (!e.currentTarget.checkValidity()) return
 
-    connectionStorage.setValue('loading')
+    statusStorage.setValue('loading')
     usernameStorage.setValue(input.current!.value)
   }
 
   useEffect(() => {
-    const unwatchConnection = connectionStorage.watch(async (connection) => {
+    const unwatchConnection = statusStorage.watch(async (connection) => {
       setStatus(connection)
 
       if (connection === 'loading') {
@@ -47,7 +47,6 @@ export default function App(props: AppProps) {
     return () => {
       unwatchConnection()
       unwatchPlaylist()
-      unwatchMessage()
     }
   }, [])
 
