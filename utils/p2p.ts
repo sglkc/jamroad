@@ -1,5 +1,5 @@
 import { Peer } from 'peerjs'
-import { Content } from './messaging'
+import { createToast } from './messaging'
 
 const PEER_ID_PREFIX = 'jamroad-'
 let credentials: { username: string, credential: string }
@@ -11,7 +11,7 @@ async function getCredentials() {
 
     credentials = json
   } catch (error) {
-    Content.sendMessage('toast', { text: 'Failed connecting to outside world :(' })
+    createToast('Failed connecting to outside world :(')
     console.error(error)
   }
 }

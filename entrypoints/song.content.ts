@@ -1,5 +1,5 @@
 import { defineContentScript } from '#imports'
-import { Content } from '@/utils/messaging'
+import { sendMessage, onMessage } from '@/utils/messaging'
 import { SongMetadata } from '@/utils/types'
 
 export default defineContentScript({
@@ -9,13 +9,13 @@ export default defineContentScript({
 
     // Peak url hijacking to force user play song
     // Its possible to use the official api but its risky
-    Content.onMessage('play', ({ data }) => {
+    onMessage('play', ({ data }) => {
       playSong(data)
       return true
     })
 
     // Testing add song
-    Content.onMessage('add', ({ data }) => {
+    onMessage('add', ({ data }) => {
       console.debug('playing song', data, 'in 5 seconds')
       setTimeout(() => playSong(data), 5000)
       return true
@@ -26,7 +26,7 @@ export default defineContentScript({
     async function playSong({ artist, link, title }: SongMetadata): Promise<boolean> {
       if (loadingSong) return false
 
-      const toastId = await Content.sendMessage('toast', {
+      const toastId = await sendMessage('toast', {
         text: `Playing "${title}" by ${artist}`,
         duration: -1,
       })
@@ -76,7 +76,7 @@ export default defineContentScript({
         location.replace('#refresh')
       }
 
-      Content.sendMessage('destroyToast', toastId)
+      sendMessage('destroyToast', toastId)
       loadingSong = false
 
       return true

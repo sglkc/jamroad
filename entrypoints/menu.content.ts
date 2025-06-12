@@ -1,5 +1,5 @@
 import { defineContentScript } from '#imports'
-import { Content } from '@/utils/messaging'
+import { sendMessage } from '@/utils/messaging'
 
 export default defineContentScript({
   matches: ['https://open.spotify.com/*'],
@@ -62,8 +62,8 @@ export default defineContentScript({
       }
 
       // Ignore errors because cant receive any response here
-      Content.sendMessage('add', { title, artist, link, image })
-      Content.sendMessage('toast', {
+      sendMessage('add', { title, artist, link, image })
+      sendMessage('toast', {
         text: `Added "${title}" by ${artist}`
       })
 

@@ -1,7 +1,7 @@
 import { defineContentScript } from '#imports'
 import Toastify from 'toastify-js'
 import StartToastifyInstance from 'toastify-js'
-import { Content, ToastMessage } from '@/utils/messaging'
+import { onMessage, ToastMessage } from '@/utils/messaging'
 import 'toastify-js/src/toastify.css'
 
 export default defineContentScript({
@@ -48,7 +48,7 @@ export default defineContentScript({
       return true
     }
 
-    Content.onMessage('toast', ({ data }) => createToast(data))
-    Content.onMessage('destroyToast', ({ data }) => destroyToast(data))
+    onMessage('toast', ({ data }) => createToast(data))
+    onMessage('destroyToast', ({ data }) => destroyToast(data))
   },
 })

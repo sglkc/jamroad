@@ -9,6 +9,7 @@ export interface ToastMessage {
 export interface ContentProtocolMap {
   add(song: SongMetadata): boolean
   play(song: SongMetadata): boolean
+  delete(link: SongMetadata['link']): boolean
   toast(data: ToastMessage): number
   destroyToast(id: number): boolean
 }
@@ -16,7 +17,7 @@ export interface ContentProtocolMap {
 export async function createToast(data: ToastMessage | string): Promise<number> {
   let message = data
   if (typeof message === 'string') message = { text: message }
-  return await Content.sendMessage('toast', message)
+  return await sendMessage('toast', message)
 }
 
-export const Content = defineExtensionMessaging<ContentProtocolMap>()
+export const { sendMessage, onMessage } = defineExtensionMessaging<ContentProtocolMap>()

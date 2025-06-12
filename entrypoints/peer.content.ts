@@ -1,5 +1,5 @@
 import { defineContentScript } from '#imports'
-import { Content, ContentProtocolMap, createToast } from '@/utils/messaging'
+import { sendMessage, ContentProtocolMap, createToast } from '@/utils/messaging'
 import { createPeer } from '@/utils/p2p'
 import { statusStorage, usernameStorage } from '@/utils/storage'
 
@@ -33,7 +33,7 @@ export default defineContentScript({
 
             const { type, data } = unk as PeerData
             createToast(`Received message ${type} from ${id}`)
-            Content.sendMessage(type, data)
+            sendMessage(type, data)
           })
 
           connection.on('error', (err) => console.error(`connection ${id} error`, err))

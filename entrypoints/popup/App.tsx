@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks'
 import { JSX } from 'preact/jsx-runtime'
 import { statusStorage, playlistStorage, usernameStorage } from '@/utils/storage'
 import { ConnectionStatus, SongMetadata } from '@/utils/types'
+import Playlist from './components/Playlist'
 
 export interface AppProps {
   status: ConnectionStatus
@@ -9,6 +10,10 @@ export interface AppProps {
   playlist: SongMetadata[]
 }
 
+/**
+ * TODO: open song link in active tab?
+ * TODO: components!
+ */
 export default function App(props: AppProps) {
   const [status, setStatus] = useState<ConnectionStatus>(props.status)
   const [playlist, setPlaylist] = useState<SongMetadata[]>(props.playlist)
@@ -78,47 +83,7 @@ export default function App(props: AppProps) {
       </form>
       <div>
         <h2 class="text-lg font-bold">Playlist</h2>
-        <ul class="grid gap-2">
-          <li class="flex gap-4 text-center fw-semibold">
-            <p class="pr-2">#</p>
-            <p class="grow">Title</p>
-          </li>
-          { playlist.length ? playlist.map((song, i) => (
-            <li class="group flex gap-2 items-center" key={song.link}>
-              <div class="pr-2">{i+1}</div>
-              <div class="min-w-8 max-w-8">
-                <img src={song.image} />
-              </div>
-              <div class="grow">
-                <p class="line-clamp-1 hover:line-clamp-none mr-auto">
-                  <a
-                    class="hover:underline underline-offset-4 underline-opacity-50"
-                    href={song.link}
-                    target="_blank"
-                  >
-                    {song.title}
-                  </a>
-                </p>
-                <p class="text-xs opacity-50">{song.artist}</p>
-              </div>
-              <div class="hidden group-hover:flex">
-                <button class="hover:text-green-500 cursor-pointer" type="button">
-                  <div class="p-3 i-my:play"></div>
-                </button>
-                <button class="hover:text-red-500 cursor-pointer" type="button">
-                  <div class="p-3 i-my:letter-x"></div>
-                </button>
-              </div>
-            </li>
-          ))
-            :
-            <div>
-              <p class="text-center">
-                Right-click on a song and click "Add to Jamroad" to get started!
-              </p>
-            </div>
-          }
-        </ul>
+        <Playlist playlist={playlist} />
       </div>
     </main>
   )
