@@ -37,9 +37,9 @@ export default defineContentScript({
       const pathname = location.pathname
 
       // Change tab url without refreshing
-      history.pushState(null, '', link)
+      history.replaceState(null, '', link)
       // Trigger react app refresh
-      location.hash = 'refresh'
+      location.replace('#refresh')
 
       // Play the song! (if the button is found)
       let intervalId: NodeJS.Timeout | undefined
@@ -72,8 +72,8 @@ export default defineContentScript({
 
       // Restore user url
       if (pathname) {
-        history.pushState(null, '', pathname)
-        location.hash = 'refresh'
+        history.replaceState(null, '', pathname)
+        location.replace('#refresh')
       }
 
       Content.sendMessage('destroyToast', toastId)

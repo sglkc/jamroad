@@ -15,7 +15,11 @@ export default defineContentScript({
       if (document.querySelector('#add-jamify')) return
 
       // Get song element
-      const song = document.querySelector<HTMLDivElement>('[data-testid="tracklist-row"][data-context-menu-open="true"]')
+      let song = document.querySelector<HTMLDivElement>(
+        '[data-context-menu-open="true"]:has([href^="/track"])'
+      )
+
+      // Song might be the top search result
       if (!song) return console.debug('song element not found')
 
       // Get list container for prepending and add to playlist item
@@ -43,7 +47,7 @@ export default defineContentScript({
       const link = titleElement.href!
 
       let image = song.querySelector<HTMLImageElement>('img')?.src
-      let artist = titleElement.nextElementSibling?.textContent
+      let artist = titleElement.nextElementSibling?.querySelector('[href^="/artist"]')?.textContent
 
       // In artist page, the song artist doesnt show in the row
       if (!artist) {
