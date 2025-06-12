@@ -12,7 +12,7 @@ export default defineContentScript({
     function bodyObserver() {
       const menu = document.querySelector<HTMLDivElement>('#context-menu > ul')
       if (!menu) return
-      if (document.querySelector('#add-jamify')) return
+      if (document.querySelector('#add-to-jamroad')) return
 
       // Get song element
       let song = document.querySelector<HTMLDivElement>(
@@ -31,9 +31,9 @@ export default defineContentScript({
 
       // Change label, set id, goldify
       const label = item.querySelector('span')!
-      label.textContent = 'Add to shared playlist'
+      label.textContent = 'Add to Jamroad'
 
-      item.id = 'add-jamify'
+      item.id = 'add-to-jamroad'
       item.style = 'filter: sepia(1) saturate(5);'
       item.addEventListener('click', () => addToPlaylist(song))
 

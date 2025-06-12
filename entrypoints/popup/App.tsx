@@ -12,7 +12,7 @@ export interface AppProps {
 export default function App(props: AppProps) {
   const [status, setStatus] = useState<ConnectionStatus>(props.status)
   const [playlist, setPlaylist] = useState<SongMetadata[]>(props.playlist)
-  const [message, setMessage] = useState<string>()
+  const [message, setMessage] = useState<string>(props.username ? `Connected as ${props.username}` : '')
   const input = useRef<HTMLInputElement>(null)
 
   const onSubmit: JSX.SubmitEventHandler<HTMLFormElement> = (e) => {
@@ -52,53 +52,73 @@ export default function App(props: AppProps) {
 
   return (
     <main class="grid gap-4">
-      <h2 class="text-lg font-bold">Connect to the internet</h2>
       <form class="grid gap-2" onSubmit={onSubmit}>
+        <h2 class="text-lg font-bold">Connect to the internet</h2>
         <div class="flex gap-2">
           <input
             ref={input}
-            class="p-2 w-full b-1 b-black invalid:b-red invalid:outline-red disabled:bg-gray-200"
+            class="p-2 w-full bg-dark-200 b-1 b-black invalid:b-red-600 invalid:outline-red-600 disabled:opacity-75"
             maxlength={16}
             pattern="[A-Za-z0-9\-_]+"
-            placeholder="Enter username (anything)"
+            placeholder="Enter username for sharing"
             disabled={status !== 'off'}
             defaultValue={props.username}
+            spellcheck={false}
             required
           />
           <button
-            class="px-4 py-2 b-1 b-black disabled:bg-gray-200"
+            class="px-4 py-2 bg-light-800 text-dark-800 b-1 b-black disabled:opacity-75"
             type="submit"
             disabled={status !== 'off'}
           >
-            Set!
+            Start!
           </button>
         </div>
-        <p>{message ?? 'alphanumeric, max. length 16 chars'}</p>
+        <p>{message || 'alphanumeric, max. length 16 chars'}</p>
       </form>
       <div>
         <h2 class="text-lg font-bold">Playlist</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th colspan={2}>Title</th>
-              <th>Artist</th>
-            </tr>
-          </thead>
-          <tbody>
-            { playlist && playlist.map((song, i) => (
-              <tr key={song.link}>
-                <td>{i+1}</td>
-                <td>
-                  <img src={song.image} />
-                </td>
-                <td>{song.title}</td>
-                <td>{song.artist}</td>
-              </tr>
-            ))
-            }
-          </tbody>
-        </table>
+        <ul class="grid gap-2">
+          <li class="flex gap-4 text-center fw-semibold">
+            <p class="pr-2">#</p>
+            <p class="grow">Title</p>
+          </li>
+          { playlist.length ? playlist.map((song, i) => (
+            <li class="group flex gap-2 items-center" key={song.link}>
+              <div class="pr-2">{i+1}</div>
+              <div class="min-w-8 max-w-8">
+                <img src={song.image} />
+              </div>
+              <div class="grow">
+                <p class="line-clamp-1 hover:line-clamp-none mr-auto">
+                  <a
+                    class="hover:underline underline-offset-4 underline-opacity-50"
+                    href={song.link}
+                    target="_blank"
+                  >
+                    {song.title}
+                  </a>
+                </p>
+                <p class="text-xs opacity-50">{song.artist}</p>
+              </div>
+              <div class="hidden group-hover:flex">
+                <button class="hover:text-green-500 cursor-pointer" type="button">
+                  <div class="p-3 i-my:play"></div>
+                </button>
+                <button class="hover:text-red-500 cursor-pointer" type="button">
+                  <div class="p-3 i-my:letter-x"></div>
+                </button>
+              </div>
+            </li>
+          ))
+            :
+            <div>
+              <p class="text-center">
+                Right-click on a song and click "Add to Jamroad" to get started!
+              </p>
+            </div>
+          }
+        </ul>
       </div>
     </main>
   )
