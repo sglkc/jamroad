@@ -2,11 +2,15 @@ import { onMessage } from '@/utils/messaging'
 import { playlistStorage } from '@/utils/storage'
 
 export default async function initPlaylistBackground() {
-  const playlist = await playlistStorage.getValue()
+  let playlist = await playlistStorage.getValue()
+
+  // Watch for external changes in the playlist storage
+  playlistStorage.watch((newPlaylist) => {
+    playlist = newPlaylist
+  })
 
   onMessage('add', async ({ data }) => {
-    playlist.push(data)
-    playlistStorage.setValue(playlist)
+    await playlistStorage.setValue([...playlist, data])
 
     return true
   })
@@ -16,7 +20,13 @@ export default async function initPlaylistBackground() {
     if (index === -1) return false
 
     playlist.splice(index, 1)
-    playlistStorage.setValue(playlist)
+    await playlistStorage.setValue(playlist)
+
+    return true
+  })
+
+  onMessage('clear', async () => {
+    await playlistStorage.setValue([])
 
     return true
   })

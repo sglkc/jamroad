@@ -10,6 +10,8 @@ export interface ContentProtocolMap {
   add(song: SongMetadata): boolean
   play(song: SongMetadata): boolean
   delete(link: SongMetadata['link']): boolean
+  clear(placeholder: true): boolean
+
   toast(data: ToastMessage): number
   destroyToast(id: number): boolean
 }

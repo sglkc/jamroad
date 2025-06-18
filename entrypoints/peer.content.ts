@@ -1,4 +1,5 @@
 import { defineContentScript } from '#imports'
+import Peer from 'peerjs'
 import { sendMessage, ContentProtocolMap, createToast } from '@/utils/messaging'
 import { createPeer } from '@/utils/p2p'
 import { statusStorage, usernameStorage } from '@/utils/storage'
@@ -13,10 +14,15 @@ export default defineContentScript({
   async main() {
     console.debug('Registered peer content script')
 
+    let peer: Peer
+
     usernameStorage.watch(async (username) => {
       if (!username) return
+      if (peer && !peer.disconnected) {
+        peer.destroy()
+      }
 
-      const peer = await createPeer(username)
+      peer = await createPeer(username)
 
       peer
         .on('open', (id) => {

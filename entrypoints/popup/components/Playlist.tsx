@@ -52,7 +52,7 @@ export default function Playlist({ playlist }: { playlist: SongMetadata[] }) {
         <p class="pr-2">#</p>
         <p class="grow">Title</p>
       </li>
-      { playlist.length ? playlist.map((song, i) => (
+      { playlist && playlist.length ? playlist.map((song, i) => (
         <PlaylistItem index={i} {...song} />
       ))
         :
