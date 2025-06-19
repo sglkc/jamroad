@@ -25,7 +25,7 @@ export default async function initMessagesBackground() {
 
   // Peak duplicate lines solving
   const types: Array<keyof ContentProtocolMap> = [
-    'play', 'toast', 'destroyToast',
+    'play', 'join', 'toast', 'destroyToast',
   ]
 
   types.forEach(type => onMessage(type, sendResponse(type)))

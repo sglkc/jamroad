@@ -1,5 +1,6 @@
 import { Dispatch, StateUpdater, useCallback, useRef } from 'preact/hooks'
 import { JSX } from 'preact/jsx-runtime'
+import { sendMessage } from '@/utils/messaging'
 import { statusStorage, usernameStorage } from '@/utils/storage'
 import { ConnectionStatus } from '@/utils/types'
 import Button from './Button'
@@ -18,15 +19,19 @@ export default function Form({ status, setUsername }: FormProps) {
     // TODO: alert!
     if (!e.currentTarget.checkValidity()) return
 
-    if (status === 'off') {
-      const username = input.current!.value.trim()
+    const username = input.current!.value.trim()
 
+    if (status === 'off') {
       await statusStorage.setValue('loading')
       await usernameStorage.setValue(username)
       setUsername(username)
       input.current!.value = ''
     } else {
-      // TODO: join session
+      console.debug(
+        'Joining to username',
+        username,
+        await sendMessage('join', username)
+      )
     }
   }, [status])
 

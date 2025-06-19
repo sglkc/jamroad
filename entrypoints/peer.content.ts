@@ -1,6 +1,6 @@
 import { defineContentScript } from '#imports'
-import Peer from 'peerjs'
-import { sendMessage, ContentProtocolMap, createToast } from '@/utils/messaging'
+import Peer, { DataConnection } from 'peerjs'
+import { sendMessage, ContentProtocolMap, createToast, onMessage } from '@/utils/messaging'
 import { createPeer } from '@/utils/p2p'
 import { statusStorage, usernameStorage } from '@/utils/storage'
 
@@ -16,6 +16,30 @@ export default defineContentScript({
 
     let peer: Peer
 
+    onMessage('join', ({ data }) =>
+      new Promise((res) => {
+        createToast(`Joining ${data}...`)
+        peer.connect(`jamroad-${data}`)
+          .once('open', () => {
+            sendMessage('addPeer', data)
+            createToast(`Joined ${data}`)
+            res(true)
+          })
+          .once('error', () => res(false))
+          .once('close', () => res(false))
+      })
+    )
+
+    onMessage('removePeer', ({ data }) => {
+      const connection = (peer.connections as Record<string, [DataConnection] | undefined>)[data]
+
+      if (!connection) return false
+
+      createToast(`Removing ${data}...`)
+      connection[0].close({ flush: true })
+      return true
+    })
+
     usernameStorage.watch(async (username) => {
       console.debug('username changed', username)
 
@@ -28,7 +52,7 @@ export default defineContentScript({
 
       peer
         .on('open', (id) => {
-          createToast(`Connected`)
+          createToast(`Connected as ${username}`)
           console.debug('Connected as', id)
           statusStorage.setValue('on')
         })
