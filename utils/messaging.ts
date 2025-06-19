@@ -12,6 +12,9 @@ export interface ContentProtocolMap {
   delete(link: SongMetadata['link']): boolean
   clear(placeholder: true): boolean
 
+  addPeer(username: string): boolean
+  removePeer(username: string): boolean
+
   toast(data: ToastMessage): number
   destroyToast(id: number): boolean
 }

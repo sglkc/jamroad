@@ -33,6 +33,7 @@ export default defineContentScript({
       const label = item.querySelector('span')!
       label.textContent = 'Add to Jamroad'
 
+      // TODO: auto open popup?
       item.id = 'add-to-jamroad'
       item.style = 'filter: sepia(1) saturate(5);'
       item.addEventListener('click', () => addToPlaylist(song))

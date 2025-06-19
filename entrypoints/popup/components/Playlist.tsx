@@ -1,6 +1,8 @@
-import { memo } from 'preact/compat'
+import { memo, useEffect, useState } from 'preact/compat'
 import { sendMessage } from '@/utils/messaging'
+import { playlistStorage } from '@/utils/storage'
 import { SongMetadata } from '@/utils/types'
+import Button from './Button'
 
 const PlaylistItem = memo((song: SongMetadata & { index: number }) => {
   const playSong = () => sendMessage('play', song)
@@ -45,7 +47,12 @@ const PlaylistItem = memo((song: SongMetadata & { index: number }) => {
   )
 })
 
-export default function Playlist({ playlist }: { playlist: SongMetadata[] }) {
+export default function Playlist() {
+  const [playlist, setPlaylist] = useState<SongMetadata[]>([])
+  const clearPlaylist = () => sendMessage('clear', true)
+
+  useEffect(() => playlistStorage.watch((playlist) => setPlaylist(playlist)), [])
+
   return (
     <ul class="grid gap-2">
       <li class="flex gap-4 text-center fw-semibold">
@@ -61,6 +68,11 @@ export default function Playlist({ playlist }: { playlist: SongMetadata[] }) {
             Right-click on a song and click "Add to Jamroad" to get started!
           </p>
         </div>
+      }
+      { playlist.length > 0 &&
+        <Button type="button" onClick={clearPlaylist}>
+          Clear Playlist
+        </Button>
       }
     </ul>
   )

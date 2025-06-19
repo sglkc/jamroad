@@ -18,6 +18,7 @@ async function getCredentials() {
 
 export async function createPeer(id: string) {
   if (!credentials) {
+    console.debug('Fetching TURN credentials...')
     await getCredentials()
   }
 

@@ -17,9 +17,11 @@ export default defineContentScript({
     let peer: Peer
 
     usernameStorage.watch(async (username) => {
-      if (!username) return
-      if (peer && !peer.disconnected) {
-        peer.destroy()
+      console.debug('username changed', username)
+
+      if (!username) {
+        if (peer && !peer.disconnected) peer.destroy()
+        return
       }
 
       peer = await createPeer(username)
@@ -32,7 +34,9 @@ export default defineContentScript({
         })
         .on('connection', (connection) => {
           const id = connection.peer.replace('jamroad-', '')
+
           createToast(`${id} joined`)
+          sendMessage('addPeer', id)
 
           connection.on('data', (unk) => {
             if (!unk || typeof unk !== 'object' || !('type' in unk) || !('data' in unk)) return
@@ -46,6 +50,7 @@ export default defineContentScript({
 
           connection.on('close', () => {
             createToast(`${id} left`)
+            sendMessage('removePeer', id)
           })
         })
         .on('disconnected', () => {

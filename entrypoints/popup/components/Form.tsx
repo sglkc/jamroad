@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'preact/hooks'
+import { Dispatch, StateUpdater, useCallback, useRef } from 'preact/hooks'
 import { JSX } from 'preact/jsx-runtime'
 import { statusStorage, usernameStorage } from '@/utils/storage'
 import { ConnectionStatus } from '@/utils/types'
@@ -6,27 +6,36 @@ import Button from './Button'
 
 export interface FormProps {
   status: ConnectionStatus
-  message: string
-  username?: string
+  setUsername: Dispatch<StateUpdater<string | undefined>>
 }
 
-export default function Form({ status, message, username }: FormProps) {
+export default function Form({ status, setUsername }: FormProps) {
   const input = useRef<HTMLInputElement>(null)
 
-  const onSubmit: JSX.SubmitEventHandler<HTMLFormElement> = useCallback((e) => {
+  const onSubmit: JSX.SubmitEventHandler<HTMLFormElement> = useCallback(async (e) => {
     e.preventDefault()
 
     // TODO: alert!
     if (!e.currentTarget.checkValidity()) return
 
     if (status === 'off') {
-      statusStorage.setValue('loading')
-      usernameStorage.setValue(input.current!.value)
+      const username = input.current!.value.trim()
+
+      await statusStorage.setValue('loading')
+      await usernameStorage.setValue(username)
+      setUsername(username)
+      input.current!.value = ''
     } else {
-      statusStorage.setValue('off')
-      usernameStorage.removeValue()
+      // TODO: join session
     }
   }, [status])
+
+  const disconnect = useCallback(async () => {
+    await statusStorage.setValue('off')
+    await usernameStorage.removeValue()
+    setUsername(undefined)
+    input.current!.value = ''
+  }, [])
 
   return (
     <form class="grid gap-2" onSubmit={onSubmit}>
@@ -34,25 +43,35 @@ export default function Form({ status, message, username }: FormProps) {
       <div class="flex gap-2">
         <input
           ref={input}
-          class="p-2 w-full bg-dark-200 b-1 b-black invalid:b-red-600 invalid:outline-red-600 disabled:opacity-75"
+          class="p-2 w-full bg-dark-200 b-1 b-black invalid:b-red-600 invalid:outline-red-600 disabled:opacity-75 empty:b-0"
           maxlength={16}
           pattern="[A-Za-z0-9\-_]+"
-          placeholder="Enter username for sharing"
-          disabled={status !== 'off'}
-          defaultValue={username}
+          placeholder={status === 'on' ? 'Join by username...' : 'Enter your username'}
+          disabled={status === 'loading'}
           spellcheck={false}
           autofocus
           required
         />
         <Button
-          class={status === 'on' ? 'bg-red-500/75!' : 'bg-green-500!'}
+          class="bg-green-500! disabled:opacity-50"
           type="submit"
           disabled={status === 'loading'}
         >
-          {status === 'on' ? 'Disconnect' : 'Connect'}
+          {status === 'on' ? 'Join' : 'Connect'}
         </Button>
+        { status === 'on' &&
+          <Button
+            class="bg-red-500 text-light"
+            type="button"
+            onClick={disconnect}
+          >
+            <div class="i-my:logout text-lg" />
+          </Button>
+        }
       </div>
-      <p>{message || 'alphanumeric, max. length 16 chars'}</p>
+      { status !== 'on' &&
+        <p>{status === 'loading' ? 'Connecting...' : 'alphanumeric, max. length 16 chars'}</p>
+      }
     </form>
   )
 }

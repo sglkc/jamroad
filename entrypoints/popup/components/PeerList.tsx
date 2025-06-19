@@ -1,0 +1,39 @@
+import { sendMessage } from '@/utils/messaging'
+import { peersStorage } from '@/utils/storage'
+import { ConnectionStatus } from '@/utils/types'
+import { memo, useEffect, useState } from 'preact/compat'
+
+export interface PeerListProps {
+  status: ConnectionStatus
+  username?: string
+}
+
+const PeerItem = memo(({ username }: { username: string }) => {
+  const removePeer = () => sendMessage('removePeer', username)
+
+  return (
+    <li class="hover:text-red hover:b-red-500 cursor-pointer b-1 p-2">
+      <button onClick={removePeer}>
+        { username }
+      </button>
+    </li>
+  )
+})
+
+export default function PeerList({ username }: PeerListProps) {
+  const [peers, setPeers] = useState<string[]>([])
+
+  useEffect(() => {
+    peersStorage.getValue().then(setPeers)
+    peersStorage.watch((newPeers) => setPeers(newPeers))
+  }, [])
+
+  return (
+    <div class="grid gap-4">
+      <h2 class="text-base">Connected as <strong>{ username }</strong></h2>
+      <ul class="flex flex-wrap justify-center gap-4">
+        { peers.map((peer) => <PeerItem key={peer} username={peer} />) }
+      </ul>
+    </div>
+  )
+}

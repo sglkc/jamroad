@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'preact/hooks'
-import Button from './components/Button'
-import Form from './components/Form'
-import Playlist from './components/Playlist'
-import { sendMessage } from '@/utils/messaging'
+import { statusStorage } from '@/utils/storage'
 import { ConnectionStatus, SongMetadata } from '@/utils/types'
-import { statusStorage, playlistStorage, usernameStorage } from '@/utils/storage'
+import Form from './components/Form'
+import PeerList from './components/PeerList'
+import Playlist from './components/Playlist'
 
 export interface AppProps {
   status: ConnectionStatus
@@ -18,51 +17,27 @@ export interface AppProps {
  */
 export default function App(props: AppProps) {
   const [status, setStatus] = useState<ConnectionStatus>(props.status)
-  const [playlist, setPlaylist] = useState<SongMetadata[]>(props.playlist)
-  const [message, setMessage] = useState<string>(
-    props.status === 'on' ? `Connected, send to your partner to start sharing!` : ''
-  )
-
-  const clearPlaylist = () => sendMessage('clear', true)
+  const [username, setUsername] = useState<string | undefined>(props.username)
 
   useEffect(() => {
-    const unwatchConnection = statusStorage.watch(async (connection) => {
-      setStatus(connection)
-
-      if (connection === 'loading') {
-        setMessage('Connecting...')
-      }
-      if (connection === 'on') {
-        setMessage('Connected as ' + await usernameStorage.getValue())
-      }
-      if (connection === 'off') {
-        setMessage('Disconnected')
-      }
-    })
-
-    const unwatchPlaylist = playlistStorage.watch((playlist) => setPlaylist(playlist))
-
     // TODO: idk if this is the best way to handle this since the cleanup wont
     // be called when the popup is closed, but it works for now
-    return () => {
-      unwatchConnection()
-      unwatchPlaylist()
-    }
+    return statusStorage.watch((connection) => setStatus(connection))
   }, [])
 
   return (
     <main class="grid gap-4">
-      <Form status={status} username={props.username} message={message} />
+          <Form status={status} setUsername={setUsername} />
+      { status !== 'on' &&
+        <>
+        </>
+      }
       { status === 'on' &&
-        <div class="grid gap-4">
+        <>
+          <PeerList username={username} status={status} />
           <h2 class="text-lg font-bold">Playlist</h2>
-          <Playlist playlist={playlist} />
-          { playlist.length > 0 &&
-            <Button type="button" onClick={clearPlaylist}>
-              Clear Playlist
-            </Button>
-          }
-        </div>
+          <Playlist />
+        </>
       }
     </main>
   )
