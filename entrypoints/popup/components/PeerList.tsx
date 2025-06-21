@@ -6,6 +6,7 @@ import { ConnectionStatus } from '@/utils/types'
 export interface PeerListProps {
   status: ConnectionStatus
   username?: string
+  peers: string[]
 }
 
 const PeerItem = ({ username }: { username: string }) => {
@@ -20,13 +21,10 @@ const PeerItem = ({ username }: { username: string }) => {
   )
 }
 
-export default function PeerList({ username }: PeerListProps) {
-  const [peers, setPeers] = useState<string[]>([])
+export default function PeerList({ username, peers: storedPeers }: PeerListProps) {
+  const [peers, setPeers] = useState<string[]>(storedPeers)
 
-  useEffect(() => {
-    peersStorage.getValue().then(setPeers)
-    peersStorage.watch((newPeers) => setPeers(newPeers))
-  }, [])
+  useEffect(() => peersStorage.watch((newPeers) => setPeers(newPeers)), [])
 
   return (
     <div class="grid gap-4">

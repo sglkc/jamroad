@@ -4,6 +4,10 @@ import { playlistStorage } from '@/utils/storage'
 import { SongMetadata } from '@/utils/types'
 import Button from './Button'
 
+interface PlaylistProps {
+  playlist: SongMetadata[]
+}
+
 const PlaylistItem = memo((song: SongMetadata & { index: number }) => {
   const playSong = () => sendMessage('play', song)
 
@@ -47,8 +51,8 @@ const PlaylistItem = memo((song: SongMetadata & { index: number }) => {
   )
 })
 
-export default function Playlist() {
-  const [playlist, setPlaylist] = useState<SongMetadata[]>([])
+export default function Playlist({ playlist: storedPlaylist }: PlaylistProps) {
+  const [playlist, setPlaylist] = useState<SongMetadata[]>(storedPlaylist)
   const clearPlaylist = () => sendMessage('clear', true)
 
   useEffect(() => playlistStorage.watch((playlist) => setPlaylist(playlist)), [])

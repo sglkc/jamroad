@@ -1,5 +1,10 @@
 import { render } from 'preact'
-import { statusStorage, playlistStorage, usernameStorage } from '@/utils/storage.ts'
+import {
+  statusStorage,
+  playlistStorage,
+  usernameStorage,
+  peersStorage,
+} from '@/utils/storage.ts'
 import App, { AppProps } from './App.tsx'
 import '@fontsource-variable/radio-canada'
 import '@unocss/reset/tailwind.css'
@@ -10,6 +15,7 @@ async function init() {
     status: await statusStorage.getValue(),
     username: await usernameStorage.getValue(),
     playlist: await playlistStorage.getValue(),
+    peers: await peersStorage.getValue(),
   }
 
   render(<App {...props} />, document.body)

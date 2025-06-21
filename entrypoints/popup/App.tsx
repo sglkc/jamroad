@@ -9,6 +9,7 @@ export interface AppProps {
   status: ConnectionStatus
   username?: string
   playlist: SongMetadata[]
+  peers: string[]
 }
 
 /**
@@ -34,9 +35,9 @@ export default function App(props: AppProps) {
       }
       { status === 'on' &&
         <>
-          <PeerList username={username} status={status} />
+          <PeerList peers={props.peers} username={username} status={status} />
           <h2 class="text-lg font-bold">Playlist</h2>
-          <Playlist />
+          <Playlist playlist={props.playlist} />
         </>
       }
     </main>
