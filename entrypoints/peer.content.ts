@@ -1,13 +1,9 @@
 import { defineContentScript } from '#imports'
 import Peer, { DataConnection } from 'peerjs'
-import { sendMessage, ContentProtocolMap, createToast, onMessage } from '@/utils/messaging'
-import { createPeer } from '@/utils/p2p'
-import { statusStorage, usernameStorage } from '@/utils/storage'
+import { sendMessage, createToast, onMessage } from '@/utils/messaging'
+import { createPeer, PEER_ID_PREFIX } from '@/utils/p2p'
+import { usernameStorage } from '@/utils/storage'
 
-interface PeerData<T extends keyof ContentProtocolMap = keyof ContentProtocolMap> {
-  type: T
-  data: Parameters<ContentProtocolMap[T]>[0]
-}
 
 export default defineContentScript({
   matches: ['https://open.spotify.com/*'],
@@ -31,62 +27,28 @@ export default defineContentScript({
     )
 
     onMessage('removePeer', ({ data }) => {
-      const connection = (peer.connections as Record<string, [DataConnection] | undefined>)[data]
+      const connection = (peer.connections as Record<string, [DataConnection] | undefined>)[PEER_ID_PREFIX + data]
 
-      if (!connection) return false
+      if (!connection || !connection[0]) return false
 
       createToast(`Removing ${data}...`)
       connection[0].close({ flush: true })
       return true
     })
 
-    usernameStorage.watch(async (username) => {
-      console.debug('username changed', username)
+    usernameStorage.getValue().then(tryCreatePeer)
+    usernameStorage.watch(tryCreatePeer)
 
+    async function tryCreatePeer(username?: string) {
       if (!username) {
         if (peer && !peer.disconnected) peer.destroy()
         return
       }
 
+      console.debug('username changed', username)
+
       peer = await createPeer(username)
-
-      peer
-        .on('open', (id) => {
-          createToast(`Connected as ${username}`)
-          console.debug('Connected as', id)
-          statusStorage.setValue('on')
-        })
-        .on('connection', (connection) => {
-          const id = connection.peer.replace('jamroad-', '')
-
-          createToast(`${id} joined`)
-          sendMessage('addPeer', id)
-
-          connection.on('data', (unk) => {
-            if (!unk || typeof unk !== 'object' || !('type' in unk) || !('data' in unk)) return
-
-            const { type, data } = unk as PeerData
-            createToast(`Received message ${type} from ${id}`)
-            sendMessage(type, data)
-          })
-
-          connection.on('error', (err) => console.error(`connection ${id} error`, err))
-
-          connection.on('close', () => {
-            createToast(`${id} left`)
-            sendMessage('removePeer', id)
-          })
-        })
-        .on('disconnected', () => {
-          createToast('Disconnected, reconnecting...')
-          peer.reconnect()
-        })
-        .on('error', (err) => {
-          createToast(`Error: ${err}`)
-          console.error('Peer connection error', err)
-          statusStorage.setValue('off')
-        })
-    })
+    }
 
     // // Get Spotify username from page (UNUSED (YET))
     // let username: string = ''

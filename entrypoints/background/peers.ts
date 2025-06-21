@@ -1,5 +1,6 @@
 import { onMessage } from '@/utils/messaging'
 import { peersStorage } from '@/utils/storage'
+import { sendResponse } from './messages'
 
 export default async function initPeersBackground() {
   let peers = await peersStorage.getValue()
@@ -15,13 +16,14 @@ export default async function initPeersBackground() {
     return true
   })
 
-  onMessage('removePeer', async ({ data }) => {
-    const index = peers.findIndex((username) => username === data)
+  onMessage('removePeer', async (message) => {
+    const index = peers.findIndex((username) => username === message.data)
     if (index === -1) return false
 
     peers.splice(index, 1)
     await peersStorage.setValue(peers)
 
-    return true
+    // Forward to content script for peer disconnect
+    return await sendResponse('removePeer')(message) as boolean
   })
 }

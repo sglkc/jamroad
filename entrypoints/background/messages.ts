@@ -12,17 +12,17 @@ export const getActiveTabId = async (sender: chrome.runtime.MessageSender) => {
   return tab?.id
 }
 
-export default async function initMessagesBackground() {
-  // Custom Event cant receive response if there are many content scripts,
-  // so this is necessary, unfortunately. Can't even use Window messaging
-  const sendResponse = (target: keyof ContentProtocolMap) =>
-    async ({ data, sender }: { data: any, sender: chrome.runtime.MessageSender }) => {
-      const tabId = await getActiveTabId(sender)
-      console.debug(target, data, tabId)
-      if (!tabId) return false
-      return sendMessage(target, data, { tabId })
-    }
+// Custom Event cant receive response if there are many content scripts,
+// so this is necessary, unfortunately. Can't even use Window messaging
+export const sendResponse = (target: keyof ContentProtocolMap) =>
+  async ({ data, sender }: { data: any, sender: chrome.runtime.MessageSender }) => {
+    const tabId = await getActiveTabId(sender)
+    console.debug(target, data, tabId)
+    if (!tabId) return false
+    return sendMessage(target, data, { tabId })
+  }
 
+export default async function initMessagesBackground() {
   // Peak duplicate lines solving
   const types: Array<keyof ContentProtocolMap> = [
     'play', 'join', 'toast', 'destroyToast',
